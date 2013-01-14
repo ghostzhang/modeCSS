@@ -1,0 +1,8 @@
+[
+  {
+    "keys": [
+      "ctrl+shift+x"
+    ],
+    "command": "mode_css"
+  }
+]

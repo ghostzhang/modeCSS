@@ -1,0 +1,32 @@
+[
+  {
+    "id": "preferences",
+    "children": [
+      {
+        "caption": "Package Settings",
+        "id": "package-settings",
+        "children": [
+          {
+            "caption": "Mode-CSS",
+            "children": [
+              {
+                "caption": "Mode-CSS Settings – Default",
+                "command": "open_file",
+                "args": {
+                  "file": "${packages}/modeCSS/modeCSS.sublime-settings"
+                }
+              },
+              {
+                "caption": "Mode-CSS Settings – User",
+                "command": "open_file",
+                "args": {
+                  "file": "${packages}/User/modeCSS.sublime-settings"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
