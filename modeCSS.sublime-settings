@@ -1,4 +1,5 @@
 {
-	"ignored_packages": ["CSS", "Vintage", "User", "Default", "KeymapManager"],
+	// "ignored_lists": [".gitmodules"],
+	"processed_lists": ["*.txt","*.html"],
 	"single_max_nums": 3
 }
