@@ -4,5 +4,10 @@
       "ctrl+shift+x"
     ],
     "command": "mode_css"
+  },{
+    "keys": [
+      "ctrl+shift+m"
+    ],
+    "command": "merge_css"
   }
 ]

@@ -1,5 +1,5 @@
 {
 	// "ignored_lists": [".gitmodules"],
-	"processed_lists": ["*.txt","*.html"],
-	"single_max_nums": 3
+	"processed_lists": ["*.css","*.html"],
+	"notSel": "nonce" // 没有选择区时默认处理方式：'nonce'为当前样式定义；'all'为整个文档
 }

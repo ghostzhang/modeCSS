@@ -1,8 +1,13 @@
 [
   {
     "keys": [
-      "ctrl+shift+x"
+      "ctrl+super+z"
     ],
     "command": "mode_css"
+  },{
+    "keys": [
+      "ctrl+super+m"
+    ],
+    "command": "merge_css"
   }
 ]
