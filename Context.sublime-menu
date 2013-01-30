@@ -1,0 +1,17 @@
+[
+  {
+    "caption": "压缩样式内容",
+    "children": [
+      {
+        "caption": "压缩当前样式定义",
+        "command": "merge_css_in_line",
+        "id": "merge_css_in_line"
+      },
+      {
+        "caption": "压缩整个文档",
+        "command": "merge_css_in_document",
+        "id": "merge_css_in_document"
+      }
+    ]
+  }
+]

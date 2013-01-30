@@ -1,5 +1,9 @@
 {
 	// "ignored_lists": [".gitmodules"],
 	"processed_lists": ["*.css","*.html"],
-	"notSel": "nonce" // 没有选择区时默认处理方式：'nonce'为当前样式定义；'all'为整个文档
+	// 样式压缩设置
+	"Delete_comments":false,// 删除注释
+	"notSel": "nonce", // 没有选择区时默认处理方式：'nonce'为当前样式定义；'all'为整个文档
+	"all_in_one": false, // 压缩为一行
+	"remove_semicolon": false // 删除最后一个分号
 }

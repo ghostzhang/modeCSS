@@ -8,6 +8,11 @@
     "keys": [
       "ctrl+super+m"
     ],
-    "command": "merge_css"
+    "command": "merge_css_in_line"
+  },{
+    "keys": [
+      "ctrl+shift+super+m"
+    ],
+    "command": "merge_css_in_document"
   }
 ]
