@@ -9,7 +9,10 @@ setlists = {}
 setlists["notSel"] = settings.get("notSel") if (settings.get("notSel")) else "nonce"
 setlists["all_in_one"] = settings.get("all_in_one") if (settings.get("all_in_one")) else ""
 setlists["remove_semicolon"] = settings.get("remove_semicolon") if (settings.get("remove_semicolon")) else ""
-setlists["Delete_comments"] = settings.get("Delete_comments") if (settings.get("Delete_comments")) else ""
+setlists["delete_comments"] = settings.get("delete_comments") if (settings.get("delete_comments")) else ""
+setlists["add_pic_time_suffix"] = settings.get("add_pic_time_suffix") if (settings.get("add_pic_time_suffix")) else ""
+setlists["pic_time_suffix_extension"] = settings.get("pic_time_suffix_extension") if (settings.get("pic_time_suffix_extension")) else ""
+setlists["pic_version_str"] = settings.get("pic_version_str") if (settings.get("pic_version_str")) else ""
 
 def max_point(region):
     '''返回整理后的区间，(a,b)且a<b'''
@@ -30,6 +33,13 @@ def expand_to_css_rule(view, cur_point):
     # just return cur_point if not matching
     return cur_point
 
+def build_time_suffix():
+    '''生成时间缀'''
+    import time
+    t = time.time()
+    t1 = time.localtime(time.time())
+    return time.strftime("%Y%m%d_%H%M%S", time.localtime())
+
 def expand_to_style_in_html(view, cur_point):
     '''取得HTML文件中的样式定义'''
     rule = '<[\s]*?style[^>]*?>[\s\S]*?<[\s]*?\/[\s]*?style[\s]*?>'
@@ -41,7 +51,9 @@ def expand_to_style_in_html(view, cur_point):
 def merge_line(data, setlists):
     '''压缩样式'''
     # data = data.encode('utf-8')
-    if setlists["Delete_comments"]:
+    _comments = []
+    version = build_time_suffix()
+    if setlists["delete_comments"]:
         strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data) # 删除注释
     else:
         _comments = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data) # 提取注释
@@ -66,16 +78,24 @@ def merge_line(data, setlists):
 
     if setlists['remove_semicolon']: # 删除最后一个分号
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
+
+    reg_background = re.compile(r'background(\s*\:|-image\s*\:)(.*?)url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.(\w+))\?*.*?[\'|\"]?\)',re.I)
+    if setlists['add_pic_time_suffix']: # 添加图片时间缀
+        if setlists['pic_time_suffix_extension']:
+            strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ".\\4)",strinfo)
+        else:
+            strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ")",strinfo)
+    else: # 删除图片时间缀
+        strinfo = reg_background.sub("background\\1\\2url(\\3)",strinfo)
+
     if not setlists['all_in_one']: # 不压缩为一行
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
-        if not setlists["remove_semicolon"]:
+        if not setlists["remove_semicolon"]:# 还原注释
             reg = re.compile(r'(\[\[!\]\])',re.I)
-            # _strinfo_ = reg.split(strinfo)
             _strinfo_ = strinfo.split('[[!]]')
-            print _strinfo_
 
-            if _comments:
+            if _comments: 
                 string = ""
                 for i in range(0, len(_comments)):
                     string += _strinfo_[i] +"\n"+ _comments[i] +"\n"

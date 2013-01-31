@@ -2,8 +2,12 @@
 	// "ignored_lists": [".gitmodules"],
 	"processed_lists": ["*.css","*.html"],
 	// 样式压缩设置
-	"Delete_comments":false,// 删除注释
+	"delete_comments":true,// 删除注释
 	"notSel": "nonce", // 没有选择区时默认处理方式：'nonce'为当前样式定义；'all'为整个文档
 	"all_in_one": false, // 压缩为一行
-	"remove_semicolon": false // 删除最后一个分号
+	"remove_semicolon": false, // 删除最后一个分号
+	// 图片时间缀
+	"add_pic_time_suffix":true, // 添加图片时间缀，为false时将删除时间缀
+	"pic_time_suffix_extension":true, // 图片时间缀后缀 true: backgroud.png?v=20130131_145829.png;false: backgroud.png?v=20130131_145829
+	"pic_version_str":"v" // 版本标识
 }
