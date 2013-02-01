@@ -2,6 +2,7 @@
 import sublime, sublime_plugin
 import locale
 import os, glob, re
+from EncodePic import encode_pic
 
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
@@ -32,6 +33,20 @@ def expand_to_css_rule(view, cur_point):
             return css_rule
     # just return cur_point if not matching
     return cur_point
+
+def expand_pic_in_css(data):
+    '''取得图片地址'''
+    pic_path = []
+    reg_background = re.compile(r'background(?:\s*\:|-image\s*\:).*?url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.\w+)\?*.*?[\'|\"]?\)',re.I)
+    reg_filter = re.compile(r'Microsoft\.AlphaImageLoader\(.*?src=[\'|\"]?([\w:\/\/\.]*\.\w+)\?*.*?[\'|\"]?.*?\)',re.I)
+    _b_ = reg_background.search(data)
+    print _b_.span()
+    _f_ = reg_filter.search(data)
+    if _b_:
+        pic_path.append(_b_.span())
+    if _f_:
+        pic_path.append(_f_.span())
+    return pic_path
 
 def build_time_suffix():
     '''生成时间缀'''
@@ -90,7 +105,6 @@ def merge_line(data, setlists):
     if set_add_pic_time_suffix: # 添加图片时间缀
         if set_pic_time_suffix_extension:
             strinfo = reg_background.sub("background\\1\\2url(\\3?" + set_pic_version_str + "=" + version + ".\\4)",strinfo)
-            # print reg_filter.search(strinfo).group(2)
             strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + set_pic_version_str + "=" + version + ".\\3'\\4)",strinfo)
         else:
             strinfo = reg_background.sub("background\\1\\2url(\\3?" + set_pic_version_str + "=" + version + ")",strinfo)
@@ -102,7 +116,7 @@ def merge_line(data, setlists):
     if not set_all_in_one: # 不压缩为一行
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
-        if not set_emove_semicolon: # 还原注释
+        if not set_remove_semicolon: # 还原注释
             reg = re.compile(r'(\[\[!\]\])',re.I)
             _strinfo_ = strinfo.split('[[!]]')
 
@@ -131,15 +145,18 @@ def MergeCssCommand(self, edit, setlists):
                 if fsyntax == 'CSS' and notSel == 'all':
                     region = sublime.Region(0, view.size()) # 全选
                     text = merge_line(self.view.substr(region), setlists) # 整理文本
+                    expand_pic_in_css(text)
                     self.view.replace(edit, region, text)
                 elif fsyntax == 'HTML' and notSel == 'all': # 处理HTML文件中的STYLE标签
                     rules = expand_to_style_in_html(view, region)
                     for i in range(len(rules)-1, -1,-1): # 倒序替换
                         text = merge_line(self.view.substr(rules[i]), setlists) # 整理文本
+                        expand_pic_in_css(text)
                         self.view.replace(edit, rules[i], text)
                 else:
                     region = expand_to_css_rule(view, region)
                     text = merge_line(self.view.substr(region), setlists) # 整理文本
+                    expand_pic_in_css(text)
                     self.view.replace(edit, region, text)
             else:
                 region = max_point(region)
@@ -150,6 +167,7 @@ def MergeCssCommand(self, edit, setlists):
                 region = max_point(sublime.Region(x.a, y.b))
 
                 text = merge_line(self.view.substr(region), setlists) # 整理文本
+                expand_pic_in_css(text)
                 self.view.replace(edit, region, text)
 
 class MergeCssInLineCommand(sublime_plugin.TextCommand):
