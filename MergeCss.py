@@ -6,13 +6,13 @@ import os, glob, re
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
 setlists = {}
-setlists["notSel"] = settings.get("notSel") if (settings.get("notSel")) else "nonce"
-setlists["all_in_one"] = settings.get("all_in_one") if (settings.get("all_in_one")) else ""
-setlists["remove_semicolon"] = settings.get("remove_semicolon") if (settings.get("remove_semicolon")) else ""
-setlists["delete_comments"] = settings.get("delete_comments") if (settings.get("delete_comments")) else ""
-setlists["add_pic_time_suffix"] = settings.get("add_pic_time_suffix") if (settings.get("add_pic_time_suffix")) else ""
-setlists["pic_time_suffix_extension"] = settings.get("pic_time_suffix_extension") if (settings.get("pic_time_suffix_extension")) else ""
-setlists["pic_version_str"] = settings.get("pic_version_str") if (settings.get("pic_version_str")) else ""
+setlists["notSel"] = settings.get("notSel","nonce")
+setlists["all_in_one"] = bool(settings.get("all_in_one",False))
+setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
+setlists["delete_comments"] = bool(settings.get("delete_comments",True))
+setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
+setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
+setlists["pic_version_str"] = settings.get("pic_version_str","v")
 
 def max_point(region):
     '''返回整理后的区间，(a,b)且a<b'''
@@ -50,10 +50,16 @@ def expand_to_style_in_html(view, cur_point):
 
 def merge_line(data, setlists):
     '''压缩样式'''
-    # data = data.encode('utf-8')
+    set_all_in_one = setlists["all_in_one"]
+    set_remove_semicolon = setlists["remove_semicolon"]
+    set_delete_comments = setlists["delete_comments"]
+    set_add_pic_time_suffix = setlists["add_pic_time_suffix"]
+    set_pic_time_suffix_extension = setlists["pic_time_suffix_extension"]
+    set_pic_version_str = setlists["pic_version_str"]
+
     _comments = []
     version = build_time_suffix()
-    if setlists["delete_comments"]:
+    if set_delete_comments:
         strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data) # 删除注释
     else:
         _comments = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data) # 提取注释
@@ -76,27 +82,27 @@ def merge_line(data, setlists):
     strinfo = re.compile(r' {2,}',re.I).sub(' ',strinfo) # 删除多余空格
     strinfo = re.compile(r'} *',re.I).sub('}',strinfo) # 删除多余空格
 
-    if setlists['remove_semicolon']: # 删除最后一个分号
+    if set_remove_semicolon: # 删除最后一个分号
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
 
     reg_background = re.compile(r'background(\s*\:|-image\s*\:)(.*?)url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.(\w+))\?*.*?[\'|\"]?\)',re.I)
     reg_filter = re.compile(r'Microsoft\.AlphaImageLoader\((.*?)src=[\'|\"]?([\w:\/\/\.]*\.(\w+))\?*.*?[\'|\"]?(.*?)\)',re.I)
-    if setlists['add_pic_time_suffix']: # 添加图片时间缀
-        if setlists['pic_time_suffix_extension']:
-            strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ".\\4)",strinfo)
+    if set_add_pic_time_suffix: # 添加图片时间缀
+        if set_pic_time_suffix_extension:
+            strinfo = reg_background.sub("background\\1\\2url(\\3?" + set_pic_version_str + "=" + version + ".\\4)",strinfo)
             # print reg_filter.search(strinfo).group(2)
-            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + setlists['pic_version_str'] + "=" + version + ".\\3'\\4)",strinfo)
+            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + set_pic_version_str + "=" + version + ".\\3'\\4)",strinfo)
         else:
-            strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ")",strinfo)
-            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + setlists['pic_version_str'] + "=" + version + "'\\4)",strinfo)
+            strinfo = reg_background.sub("background\\1\\2url(\\3?" + set_pic_version_str + "=" + version + ")",strinfo)
+            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + set_pic_version_str + "=" + version + "'\\4)",strinfo)
     else: # 删除图片时间缀
         strinfo = reg_background.sub("background\\1\\2url(\\3)",strinfo)
         strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2'\\4)",strinfo)
 
-    if not setlists['all_in_one']: # 不压缩为一行
+    if not set_all_in_one: # 不压缩为一行
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
-        if not setlists["remove_semicolon"]:# 还原注释
+        if not set_emove_semicolon: # 还原注释
             reg = re.compile(r'(\[\[!\]\])',re.I)
             _strinfo_ = strinfo.split('[[!]]')
 
