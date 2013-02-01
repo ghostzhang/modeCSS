@@ -80,13 +80,18 @@ def merge_line(data, setlists):
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
 
     reg_background = re.compile(r'background(\s*\:|-image\s*\:)(.*?)url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.(\w+))\?*.*?[\'|\"]?\)',re.I)
+    reg_filter = re.compile(r'Microsoft\.AlphaImageLoader\((.*?)src=[\'|\"]?([\w:\/\/\.]*\.(\w+))\?*.*?[\'|\"]?(.*?)\)',re.I)
     if setlists['add_pic_time_suffix']: # 添加图片时间缀
         if setlists['pic_time_suffix_extension']:
             strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ".\\4)",strinfo)
+            # print reg_filter.search(strinfo).group(2)
+            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + setlists['pic_version_str'] + "=" + version + ".\\3'\\4)",strinfo)
         else:
             strinfo = reg_background.sub("background\\1\\2url(\\3?" + setlists['pic_version_str'] + "=" + version + ")",strinfo)
+            strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + setlists['pic_version_str'] + "=" + version + "'\\4)",strinfo)
     else: # 删除图片时间缀
         strinfo = reg_background.sub("background\\1\\2url(\\3)",strinfo)
+        strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2'\\4)",strinfo)
 
     if not setlists['all_in_one']: # 不压缩为一行
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
