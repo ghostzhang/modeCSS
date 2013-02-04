@@ -2,7 +2,6 @@
 import sublime, sublime_plugin
 import locale
 import os, glob, re
-from EncodePic import encode_pic
 
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
@@ -34,20 +33,6 @@ def expand_to_css_rule(view, cur_point):
     # just return cur_point if not matching
     return cur_point
 
-def expand_pic_in_css(data):
-    '''取得图片地址'''
-    pic_path = []
-    reg_background = re.compile(r'background(?:\s*\:|-image\s*\:).*?url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.\w+)\?*.*?[\'|\"]?\)',re.I)
-    reg_filter = re.compile(r'Microsoft\.AlphaImageLoader\(.*?src=[\'|\"]?([\w:\/\/\.]*\.\w+)\?*.*?[\'|\"]?.*?\)',re.I)
-    _b_ = reg_background.search(data)
-    print _b_.span()
-    _f_ = reg_filter.search(data)
-    if _b_:
-        pic_path.append(_b_.span())
-    if _f_:
-        pic_path.append(_f_.span())
-    return pic_path
-
 def build_time_suffix():
     '''生成时间缀'''
     import time
@@ -72,13 +57,13 @@ def merge_line(data, setlists):
     set_pic_time_suffix_extension = setlists["pic_time_suffix_extension"]
     set_pic_version_str = setlists["pic_version_str"]
 
-    _comments = []
+    _comments_ = []
     version = build_time_suffix()
     if set_delete_comments:
         strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data) # 删除注释
     else:
-        _comments = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data) # 提取注释
-        _comments.append("")
+        _comments_ = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data) # 提取注释
+        _comments_.append("")
         strinfo = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).sub('[[!]]',data)
 
     strinfo = re.compile(r'@(?:import|charset)( *.*?);+',re.I).sub('',strinfo) # 删除外部引用、编码申明
@@ -120,10 +105,10 @@ def merge_line(data, setlists):
             reg = re.compile(r'(\[\[!\]\])',re.I)
             _strinfo_ = strinfo.split('[[!]]')
 
-            if _comments: 
+            if _comments_: 
                 string = ""
-                for i in range(0, len(_comments)):
-                    string += _strinfo_[i] +"\n"+ _comments[i] +"\n"
+                for i in range(0, len(_comments_)):
+                    string += _strinfo_[i] +"\n"+ _comments_[i] +"\n"
                 strinfo = string
                 
     return strinfo
@@ -134,8 +119,8 @@ def MergeCssCommand(self, edit, setlists):
     sel = view.sel()
 
     syntax = view.settings().get('syntax')
-    _fsyntax = re.search(r'\/([\w ]+)\.',syntax)
-    fsyntax = _fsyntax.group(1) # 取得文件类型
+    _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
+    fsyntax = _fsyntax_.group(1) # 取得文件类型
 
     notSel = setlists['notSel'] # 未选中时默认处理方式
 
@@ -145,18 +130,15 @@ def MergeCssCommand(self, edit, setlists):
                 if fsyntax == 'CSS' and notSel == 'all':
                     region = sublime.Region(0, view.size()) # 全选
                     text = merge_line(self.view.substr(region), setlists) # 整理文本
-                    expand_pic_in_css(text)
                     self.view.replace(edit, region, text)
                 elif fsyntax == 'HTML' and notSel == 'all': # 处理HTML文件中的STYLE标签
                     rules = expand_to_style_in_html(view, region)
                     for i in range(len(rules)-1, -1,-1): # 倒序替换
                         text = merge_line(self.view.substr(rules[i]), setlists) # 整理文本
-                        expand_pic_in_css(text)
                         self.view.replace(edit, rules[i], text)
                 else:
                     region = expand_to_css_rule(view, region)
                     text = merge_line(self.view.substr(region), setlists) # 整理文本
-                    expand_pic_in_css(text)
                     self.view.replace(edit, region, text)
             else:
                 region = max_point(region)
@@ -167,7 +149,6 @@ def MergeCssCommand(self, edit, setlists):
                 region = max_point(sublime.Region(x.a, y.b))
 
                 text = merge_line(self.view.substr(region), setlists) # 整理文本
-                expand_pic_in_css(text)
                 self.view.replace(edit, region, text)
 
 class MergeCssInLineCommand(sublime_plugin.TextCommand):
