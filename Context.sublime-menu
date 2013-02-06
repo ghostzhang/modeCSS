@@ -11,6 +11,14 @@
         "caption": "压缩整个文档",
         "command": "merge_css_in_document",
         "id": "merge_css_in_document"
+      },
+      {
+        "caption": "-"
+      },
+      {
+        "caption": "转换图片为Base64编码",
+        "command": "encode_pic_to_base64",
+        "id": "encode_pic_to_base64"
       }
     ]
   }

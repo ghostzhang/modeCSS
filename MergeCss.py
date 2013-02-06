@@ -113,7 +113,17 @@ def merge_line(data, setlists):
                 
     return strinfo
 
-def MergeCssCommand(self, edit, setlists):
+def get_cur_point(view, region):
+    '''取得选区区间'''
+    region = max_point(region)
+    _x = sublime.Region(region.a, region.a) # 起点坐标
+    _y = sublime.Region(region.b, region.b) # 终点坐标
+    x = max_point(expand_to_css_rule(view, _x))
+    y = max_point(expand_to_css_rule(view, _y))
+    region = max_point(sublime.Region(x.a, y.b))
+    return region
+
+def merge_css(self, edit, setlists):
     '''压缩样式内容'''
     view = self.view
     sel = view.sel()
@@ -129,38 +139,33 @@ def MergeCssCommand(self, edit, setlists):
             if region.empty():# 如果没有选中
                 if fsyntax == 'CSS' and notSel == 'all':
                     region = sublime.Region(0, view.size()) # 全选
-                    text = merge_line(self.view.substr(region), setlists) # 整理文本
-                    self.view.replace(edit, region, text)
+                    text = merge_line(view.substr(region), setlists) # 整理文本
+                    view.replace(edit, region, text)
                 elif fsyntax == 'HTML' and notSel == 'all': # 处理HTML文件中的STYLE标签
                     rules = expand_to_style_in_html(view, region)
                     for i in range(len(rules)-1, -1,-1): # 倒序替换
-                        text = merge_line(self.view.substr(rules[i]), setlists) # 整理文本
-                        self.view.replace(edit, rules[i], text)
+                        text = merge_line(view.substr(rules[i]), setlists) # 整理文本
+                        view.replace(edit, rules[i], text)
                 else:
                     region = expand_to_css_rule(view, region)
-                    text = merge_line(self.view.substr(region), setlists) # 整理文本
-                    self.view.replace(edit, region, text)
+                    text = merge_line(view.substr(region), setlists) # 整理文本
+                    view.replace(edit, region, text)
             else:
-                region = max_point(region)
-                _x = sublime.Region(region.a, region.a) # 起点坐标
-                _y = sublime.Region(region.b, region.b) # 终点坐标
-                x = max_point(expand_to_css_rule(view, _x))
-                y = max_point(expand_to_css_rule(view, _y))
-                region = max_point(sublime.Region(x.a, y.b))
+                region = get_cur_point(view,region)
 
-                text = merge_line(self.view.substr(region), setlists) # 整理文本
-                self.view.replace(edit, region, text)
+                text = merge_line(view.substr(region), setlists) # 整理文本
+                view.replace(edit, region, text)
 
 class MergeCssInLineCommand(sublime_plugin.TextCommand):
     '''压缩当前样式定义'''
     def run(self, edit):
         view = self.view
         setlists["notSel"] = "nonce"
-        MergeCssCommand(self, edit, setlists)
+        merge_css(self, edit, setlists)
 
 class MergeCssInDocumentCommand(sublime_plugin.TextCommand):
     '''压缩整个文档'''
     def run(self, edit):
         view = self.view
         setlists["notSel"] = "all"
-        MergeCssCommand(self, edit, setlists)
+        merge_css(self, edit, setlists)
