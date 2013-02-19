@@ -2,13 +2,13 @@
 import sublime, sublime_plugin
 import os,re
 import urllib
+import base64
 from MergeCss import get_cur_point
 from MergeCss import expand_to_css_rule
 
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
 setlists = {}
-setlists["notSel"] = settings.get("notSel","nonce")
 setlists["default_porject_path"] = settings.get("default_porject_path","")
 
 def expand_to_style_in_html(view, cur_point):
@@ -34,6 +34,11 @@ def get_dis(view):
     if view.file_name():
         path = os.path.normpath(os.path.normcase(view.file_name()))
         return os.path.dirname(path)
+
+def point_to_region(point_):
+    '''转换成区域'''
+    if len(point_) > 0:
+        return sublime.Region(int(point_[0]), int(point_[1]))
 
 def calc(path_a_,path_b_):
     ''' 路径转换
@@ -110,14 +115,14 @@ def expand_pic_in_css(region,data):
         pic_path.append(_f_)
     if _i_:
         pic_path.append(_i_)
-    print pic_path
     return pic_path
 
 def encode_pic(path):
     if os.path.isfile(path):
         extension = os.path.splitext(path)[1].split(".")[1]
         with open(path, "rb") as f:
-            cont = f.read().encode("base64")
+            cont = base64.b64encode(f.read())
+            # cont = f.read().encode("base64")
         # print urllib.quote(base64)
         return "data:image/"+ extension +";base64," + cont
 
@@ -149,42 +154,38 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                         # text = 
                         print _region
                         rules_ = expand_pic_in_css(_region,view.substr(_region)) # 取得图片路径列表
-                        # _pic_path_ = []
-                        # for rules in rules_:
-                        #     for pic_path in rules:
-                        #         if project_dir:
-                        #             _pic_path = get_abs_path(pic_path,project_dir) # 相对路径转绝对路径
-                        #             if os.path.isfile(_pic_path):
-                        #                 # print os.path.getsize(view.file_name())
-                        #                 _temp = encode_pic(_pic_path)
-                        #             else:
-                        #                 _temp = _pic_path
-                        #             _pic_path_.append(_temp)
+                        print rules_
+                        _pic_path_ = []
+                        for rules in rules_:
+                            for pic_path_ in rules:
+                                if project_dir:
+                                    _pic_path = get_abs_path(pic_path_[1],project_dir) # 相对路径转绝对路径
+                                    _temp_ = []
+                                    if os.path.isfile(_pic_path):
+                                        print os.path.getsize(view.file_name())
+                                        _temp_.append(pic_path_[0])
+                                        _temp_.append(encode_pic(_pic_path))
+                                    else:
+                                        _temp_.append("")
+                                        _temp_.append(_pic_path)
+                                    _pic_path_.append(_temp_)
 
-                    # if fsyntax == 'HTML' and htmlcont:
-                    #     reg_rule = re.compile(r'(<img[^>]+src\s*=\s*[\'\"])[^\'\"]+([\'\"][^>]*>)',re.I)
-                    #     for match_ in _pic_path_:
-                    #         if match_:
-                    #             text = reg_rule.sub("\\1"+match_+"\\2",view.substr(_region))
-                    #             self.view.replace(edit, _region, text)
-                    # else:
-                    #     reg_background = re.compile(r'(background(?:\s*\:|-image\s*\:).*?url\([\'|\"]?)[\w+:\/\/^]?[^? \}]*\.\w+\?*.*?([\'|\"]?\))',re.I)
-                    #     reg_filter = re.compile(r'(Microsoft\.AlphaImageLoader\(.*?src=[\'|\"]?)[\w:\/\/\.]*\.\w+\?*.*?([\'|\"]?.*?\))',re.I)
-                    #     # region_img = reg_background.finditer(view.substr(_region))
-                    #     # for _f in region_img:
-                    #     #     print view.substr(sublime.Region(_f.start(),_f.end()))
-                    #     for match_ in _pic_path_:
-                    #         text = reg_background.sub("\\1" + match_ + "\\2",view.substr(_region))
-                    #         self.view.replace(edit, _region, text)
-                    #         #     text = reg_filter.sub("\\1"+match_+"\\2",view.substr(_region))
-                    #         #     self.view.replace(edit, _region, text)
+                    if htmlcont:
+                        reg_rule = re.compile(r'(<img[^>]+src\s*=\s*[\'\"])[^\'\"]+([\'\"][^>]*>)',re.I)
+                    else:
+                        reg_background = re.compile(r'(background(?:\s*\:|-image\s*\:).*?url\([\'|\"]?)[\w+:\/\/^]?[^? \}]*\.\w+\?*.*?([\'|\"]?\))',re.I)
+                        reg_filter = re.compile(r'(Microsoft\.AlphaImageLoader\(.*?src=[\'|\"]?)[\w:\/\/\.]*\.\w+\?*.*?([\'|\"]?.*?\))',re.I)
 
-                else:
-                    region = get_cur_point(view,region)
-                        # print _pic_path_
-                        # for i in range(len(rules_)-1, -1,-1): # 倒序替换
-                        #     # self.view.replace(edit, region, text)
-                        #     print _region
+                    for i in range(len(_pic_path_)-1, -1,-1): # 倒序替换
+                        if _pic_path_[i][0]:
+                            _region = point_to_region(_pic_path_[i][0])
 
-                    text = merge_line(self.view.substr(region), setlists) # 整理文本
-                    self.view.replace(edit, region, text)
+                            if htmlcont:
+                                text = reg_rule.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
+                            else:
+                                text = reg_background.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
+                                self.view.replace(edit, _region, text)
+                                text = reg_filter.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
+                            self.view.replace(edit, _region, text)
+
+                # else:
