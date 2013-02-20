@@ -14,5 +14,10 @@
       "ctrl+shift+super+m"
     ],
     "command": "merge_css_in_document"
+  },{
+    "keys": [
+      "ctrl+shift+e"
+    ],
+    "command": "encode_pic_to_base64"
   }
 ]
