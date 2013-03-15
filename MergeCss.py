@@ -74,7 +74,7 @@ def merge_line(data, setlists):
     strinfo = re.compile(r' *: *',re.I).sub(':',strinfo) # 删除多余空格
     strinfo = re.compile(r'^ ',re.I).sub('',strinfo) # 删除多余空格
     strinfo = re.compile(r' *; *',re.I).sub(';',strinfo) # 删除多余空格
-    strinfo = re.compile(r': *0[px|pt|em|%]+',re.I).sub(':0',strinfo) # 删除多余空格
+    strinfo = re.compile(r'([: ]+0)[px|pt|em|%]+',re.I).sub('\\1',strinfo) # 删除0值单位
     strinfo = re.compile(r'"{2,}',re.I).sub('"',strinfo) # 删除多余引号
     strinfo = re.compile(r'\'{2,}',re.I).sub('\'',strinfo) # 删除多余引号
     strinfo = re.compile(r'content:[\"|\'][; ]',re.I).sub('content:\"\";',strinfo) # 修正content引号缺失
