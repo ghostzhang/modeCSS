@@ -2,6 +2,7 @@
 import sublime, sublime_plugin
 import locale
 import os, glob, re
+import modeCSS.Lib
 
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
@@ -13,40 +14,6 @@ setlists["delete_comments"] = bool(settings.get("delete_comments",True))
 setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
 setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
 setlists["pic_version_str"] = settings.get("pic_version_str","v")
-
-def max_point(region):
-    '''返回整理后的区间，(a,b)且a<b'''
-    _a = region.a
-    _b = region.b
-    if _a >_b:
-        return sublime.Region(_b,_a)
-    else:
-        return sublime.Region(_a,_b)
-
-def expand_to_css_rule(view, cur_point):
-    '''取得光标所在的样式定义'''
-    rule = '^\w*[^{}\n]+ ?\{([^{}])*\}'
-    css_rules = view.find_all(rule)
-    for css_rule in css_rules:
-        if css_rule.contains(cur_point):
-            return css_rule
-    # just return cur_point if not matching
-    return cur_point
-
-def build_time_suffix():
-    '''生成时间缀'''
-    import time
-    t = time.time()
-    t1 = time.localtime(time.time())
-    return time.strftime("%Y%m%d_%H%M%S", time.localtime())
-
-def expand_to_style_in_html(view, cur_point):
-    '''取得HTML文件中的样式定义'''
-    rule = '<[\s]*?style[^>]*?>[\s\S]*?<[\s]*?\/[\s]*?style[\s]*?>'
-    css_rules = view.find_all(rule)
-    if css_rules:
-        return css_rules
-    return cur_point
 
 def merge_line(data, setlists):
     '''压缩样式'''
@@ -113,15 +80,6 @@ def merge_line(data, setlists):
                 
     return strinfo
 
-def get_cur_point(view, region):
-    '''取得选区区间'''
-    region = max_point(region)
-    _x = sublime.Region(region.a, region.a) # 起点坐标
-    _y = sublime.Region(region.b, region.b) # 终点坐标
-    x = max_point(expand_to_css_rule(view, _x))
-    y = max_point(expand_to_css_rule(view, _y))
-    region = max_point(sublime.Region(x.a, y.b))
-    return region
 
 def merge_css(self, edit, setlists):
     '''压缩样式内容'''

@@ -16,7 +16,7 @@
         "caption": "-"
       },
       {
-        "caption": "转换图片为Base64编码",
+        "caption": "Img To Base64",
         "command": "encode_pic_to_base64",
         "id": "encode_pic_to_base64"
       }

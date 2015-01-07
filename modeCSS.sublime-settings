@@ -1,6 +1,6 @@
 {
 	// "ignored_lists": [".gitmodules"],
-	"processed_lists": ["*.css","*.html"],
+	"processed_lists": ["*.css","*.html","*.htm","*.shtml"],
 	// 样式压缩设置
 	"delete_comments":false,// 删除注释
 	"notSel": "nonce", // 没有选择区时默认处理方式：'nonce'为当前样式定义；'all'为整个文档
