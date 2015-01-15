@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sublime,os
+
 def max_point(region):
     '''返回整理后的区间，(a,b)且a<b'''
     _a = region.a
@@ -34,7 +36,7 @@ def expand_to_style_in_html(view, cur_point):
     return cur_point
 
 def get_cur_point(view, region):
-    '''取得选区区间'''
+    '''取得当前行选区区间'''
     region = max_point(region)
     _x = sublime.Region(region.a, region.a) # 起点坐标
     _y = sublime.Region(region.b, region.b) # 终点坐标

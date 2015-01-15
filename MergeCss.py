@@ -25,7 +25,7 @@ def merge_line(data, setlists):
     set_pic_version_str = setlists["pic_version_str"]
 
     _comments_ = []
-    version = build_time_suffix()
+    version = modeCSS.Lib.build_time_suffix()
     if set_delete_comments:
         strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data) # 删除注释
     else:
@@ -100,16 +100,16 @@ def merge_css(self, edit, setlists):
                     text = merge_line(view.substr(region), setlists) # 整理文本
                     view.replace(edit, region, text)
                 elif fsyntax == 'HTML' and notSel == 'all': # 处理HTML文件中的STYLE标签
-                    rules = expand_to_style_in_html(view, region)
+                    rules = modeCSS.Lib.expand_to_style_in_html(view, region)
                     for i in range(len(rules)-1, -1,-1): # 倒序替换
                         text = merge_line(view.substr(rules[i]), setlists) # 整理文本
                         view.replace(edit, rules[i], text)
                 else:
-                    region = expand_to_css_rule(view, region)
+                    region = modeCSS.Lib.expand_to_css_rule(view, region)
                     text = merge_line(view.substr(region), setlists) # 整理文本
                     view.replace(edit, region, text)
             else:
-                region = get_cur_point(view,region)
+                region = modeCSS.Lib.get_cur_point(view,region)
 
                 text = merge_line(view.substr(region), setlists) # 整理文本
                 view.replace(edit, region, text)
