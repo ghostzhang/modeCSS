@@ -13,6 +13,11 @@
         "id": "merge_css_in_document"
       },
       {
+        "caption": "压缩整个文档为一行",
+        "command": "merge_css_in_document_one_line",
+        "id": "merge_css_in_document_one_line"
+      },
+      {
         "caption": "-"
       },
       {

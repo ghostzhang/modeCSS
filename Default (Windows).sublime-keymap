@@ -16,6 +16,12 @@
     "command": "merge_css_in_document"
   },{
     "keys": [
+      "ctrl+shift+alt+m",
+      "ctrl+shift+alt+l"
+    ],
+    "command": "merge_css_in_document_one_line"
+  },{
+    "keys": [
       "ctrl+shift+e"
     ],
     "command": "encode_pic_to_base64"

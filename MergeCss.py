@@ -4,16 +4,18 @@ import locale
 import os, glob, re
 import modeCSS.Lib
 
+setlists = {}
 SETTINGS_FILE = "modeCSS.sublime-settings"
 settings = sublime.load_settings(SETTINGS_FILE)
-setlists = {}
-setlists["notSel"] = settings.get("notSel","nonce")
-setlists["all_in_one"] = bool(settings.get("all_in_one",False))
-setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
-setlists["delete_comments"] = bool(settings.get("delete_comments",True))
-setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
-setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
-setlists["pic_version_str"] = settings.get("pic_version_str","v")
+
+def get_default_set():
+    setlists["notSel"] = settings.get("notSel","nonce")
+    setlists["all_in_one"] = bool(settings.get("all_in_one",False))
+    setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
+    setlists["delete_comments"] = bool(settings.get("delete_comments",True))
+    setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
+    setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
+    setlists["pic_version_str"] = settings.get("pic_version_str","v")
 
 def merge_line(data, setlists):
     '''压缩样式'''
@@ -47,7 +49,7 @@ def merge_line(data, setlists):
     strinfo = re.compile(r'content:[\"|\'][; ]',re.I).sub('content:\"\";',strinfo) # 修正content引号缺失
     strinfo = re.compile(r';{2,}',re.I).sub(';',strinfo) # 删除多余空格
     strinfo = re.compile(r' {2,}',re.I).sub(' ',strinfo) # 删除多余空格
-    strinfo = re.compile(r'} *',re.I).sub('}',strinfo) # 删除多余空格
+    strinfo = re.compile(r' *} *',re.I).sub('}',strinfo) # 删除多余空格
 
     if set_remove_semicolon: # 删除最后一个分号
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
@@ -72,7 +74,7 @@ def merge_line(data, setlists):
             reg = re.compile(r'(\[\[!\]\])',re.I)
             _strinfo_ = strinfo.split('[[!]]')
 
-            if _comments_: 
+            if len(_comments_) >1: 
                 string = ""
                 for i in range(0, len(_comments_)):
                     string += _strinfo_[i] +"\n"+ _comments_[i] +"\n"
@@ -118,6 +120,7 @@ class MergeCssInLineCommand(sublime_plugin.TextCommand):
     '''压缩当前样式定义'''
     def run(self, edit):
         view = self.view
+        get_default_set()
         setlists["notSel"] = "nonce"
         merge_css(self, edit, setlists)
 
@@ -125,5 +128,15 @@ class MergeCssInDocumentCommand(sublime_plugin.TextCommand):
     '''压缩整个文档'''
     def run(self, edit):
         view = self.view
+        get_default_set()
         setlists["notSel"] = "all"
+        merge_css(self, edit, setlists)
+
+class MergeCssInDocumentOneLineCommand(sublime_plugin.TextCommand):
+    '''压缩整个文档为一行'''
+    def run(self, edit):
+        view = self.view
+        get_default_set()
+        setlists["notSel"] = "all"
+        setlists["all_in_one"] = True
         merge_css(self, edit, setlists)
