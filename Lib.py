@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 import sublime,os
 
+def add_region(region,region_len):
+    '''返回region加上region_len后的区间'''
+    region = max_point(region)
+    _a = region.a
+    _b = _a + region_len
+    return sublime.Region(_a,_b)
+
 def max_point(region):
     '''返回整理后的区间，(a,b)且a<b'''
     _a = region.a
@@ -17,7 +24,6 @@ def expand_to_css_rule(view, cur_point):
     for css_rule in css_rules:
         if css_rule.contains(cur_point):
             return css_rule
-    # just return cur_point if not matching
     return cur_point
 
 def build_time_suffix():
@@ -27,7 +33,7 @@ def build_time_suffix():
     t1 = time.localtime(time.time())
     return time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
-def expand_to_style_in_html(view, cur_point):
+def expand_to_style(view, cur_point):
     '''取得HTML文件中的样式定义'''
     rule = '<[\s]*?style[^>]*?>[\s\S]*?<[\s]*?\/[\s]*?style[\s]*?>'
     css_rules = view.find_all(rule)
@@ -38,14 +44,21 @@ def expand_to_style_in_html(view, cur_point):
 def get_cur_point(view, region):
     '''取得当前行选区区间'''
     region = max_point(region)
-    _x = sublime.Region(region.a, region.a) # 起点坐标
-    _y = sublime.Region(region.b, region.b) # 终点坐标
+    # 起点坐标
+    _x = sublime.Region(region.a, region.a)
+    # 终点坐标
+    _y = sublime.Region(region.b, region.b)
     x = max_point(expand_to_css_rule(view, _x))
     y = max_point(expand_to_css_rule(view, _y))
-    region = max_point(sublime.Region(x.a, y.b))
-    return region
+    _region = max_point(sublime.Region(x.a, y.b))
+    # 如果不是CSS内容，则尝试用HTML读取
+    if region == _region:
+        x = max_point(expand_to_img(view, _x))
+        y = max_point(expand_to_img(view, _y))
+        _region = max_point(sublime.Region(x.a, y.b))
+    return _region
 
-def expand_to_img_in_html(view, img_point):
+def expand_to_img(view, img_point):
     '''取得HTML文件中的img'''
     rule = '<img[^>]+src\s*=\s*[\'\"]([^\'\"]+)[\'\"][^>]*>'
     img_rules = view.find_all(rule)

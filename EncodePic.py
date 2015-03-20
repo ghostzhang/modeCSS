@@ -36,7 +36,6 @@ def expand_pic_in_html(region,data):
 def encode_pic(path):
     if os.path.isfile(path):
         extension = os.path.splitext(path)[1].split(".")[1]
-        # print(extension)
         with open(path, "rb") as f:
             cont = base64.b64encode(f.read())
         return "data:image/"+ extension +";base64," + cont.decode('ascii')
@@ -49,37 +48,35 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
 
         syntax = view.settings().get('syntax')
         _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
-        fsyntax = _fsyntax_.group(1) # 取得文件类型
+        # 取得文件类型
+        fsyntax = _fsyntax_.group(1)
 
         project_dir = setlists["default_porject_path"] or modeCSS.Lib.get_dis(view)
 
+        for region in sel:
+            _pic_path_ = []
+            _region = modeCSS.Lib.get_cur_point(view, region)
 
-        if fsyntax == 'CSS' or fsyntax == 'HTML':
-            for region in sel:
-                _pic_path_ = []
-                _region = modeCSS.Lib.get_cur_point(view, region)
-                if region.empty():#未选中
-                    _region_img = modeCSS.Lib.expand_to_img_in_html(view,region)
-                    if not (_region_img == region):
-                        _region = _region_img
+            if _region:
+                # 取得图片路径列表
+                rules_ = expand_pic_in_html(_region,view.substr(_region)) 
+                # print(rules_)
 
-                if _region:
-                    rules_ = expand_pic_in_html(_region,view.substr(_region)) # 取得图片路径列表
+                if len(rules_) > 0:
+                    for rules in rules_:
+                        for pic_path_ in rules:
+                            if project_dir:
+                                # 相对路径转绝对路径
+                                _pic_path = modeCSS.Lib.get_abs_path(pic_path_[1],project_dir) 
 
-                    if len(rules_) > 0:
-                        for rules in rules_:
-                            for pic_path_ in rules:
-                                if project_dir:
-                                    _pic_path = modeCSS.Lib.get_abs_path(pic_path_[1],project_dir) # 相对路径转绝对路径
-
-                                    _temp_ = []
-                                    if os.path.isfile(_pic_path):
-                                        _temp_.append(pic_path_[0])
-                                        _temp_.append(encode_pic(_pic_path))
-                                    else:
-                                        _temp_.append("")
-                                        _temp_.append(_pic_path)
-                                    _pic_path_.append(_temp_)
+                                _temp_ = []
+                                if os.path.isfile(_pic_path):
+                                    _temp_.append(pic_path_[0])
+                                    _temp_.append(encode_pic(_pic_path))
+                                else:
+                                    _temp_.append("")
+                                    _temp_.append(_pic_path)
+                                _pic_path_.append(_temp_)
 
                 reg_rule = re.compile(r'(<img[^>]+src\s*=\s*[\'\"])[^\'\"]+([\'\"][^>]*>)',re.I)
                 reg_background = re.compile(r'(background(?:\s*\:|-image\s*\:).*?url\([\'|\"]?)[\w+:\/\/^]?[^? \}]*\.\w+\?*.*?([\'|\"]?\))',re.I)
@@ -91,10 +88,11 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                             _region = modeCSS.Lib.point_to_region(_pic_path_[i][0])
 
                             text = reg_rule.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
+                            # print(_pic_path_[i][1])
                             self.view.replace(edit, _region, text)
                             text = reg_background.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             self.view.replace(edit, _region, text)
                             text = reg_filter.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             self.view.replace(edit, _region, text)
 
-                            fold(_region)
+                            # self.view.fold(modeCSS.Lib.add_region(_region,len(_pic_path_[i][1])))

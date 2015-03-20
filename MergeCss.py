@@ -29,9 +29,11 @@ def merge_line(data, setlists):
     _comments_ = []
     version = modeCSS.Lib.build_time_suffix()
     if set_delete_comments:
-        strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data) # 删除注释
+        # 删除注释
+        strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data)
     else:
-        _comments_ = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data) # 提取注释
+        # 提取注释
+        _comments_ = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).findall(data)
         _comments_.append("")
         strinfo = re.compile(r'(\/\*(?:.|\s)*?\*\/)',re.I).sub('[[!]]',data)
 
@@ -50,13 +52,14 @@ def merge_line(data, setlists):
     strinfo = re.compile(r';{2,}',re.I).sub(';',strinfo) # 删除多余空格
     strinfo = re.compile(r' {2,}',re.I).sub(' ',strinfo) # 删除多余空格
     strinfo = re.compile(r' *} *',re.I).sub('}',strinfo) # 删除多余空格
-
-    if set_remove_semicolon: # 删除最后一个分号
+    # 删除最后一个分号
+    if set_remove_semicolon:
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
 
     reg_background = re.compile(r'background(\s*\:|-image\s*\:)(.*?)url\([\'|\"]?([\w+:\/\/^]?[^? \}]*\.(\w+))\?*.*?[\'|\"]?\)',re.I)
     reg_filter = re.compile(r'Microsoft\.AlphaImageLoader\((.*?)src=[\'|\"]?([\w:\/\/\.]*\.(\w+))\?*.*?[\'|\"]?(.*?)\)',re.I)
-    if set_add_pic_time_suffix: # 添加图片时间缀
+    # 添加图片时间缀
+    if set_add_pic_time_suffix:
         if set_pic_time_suffix_extension:
             strinfo = reg_background.sub("background\\1\\2url(\\3?" + set_pic_version_str + "=" + version + ".\\4)",strinfo)
             strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2?" + set_pic_version_str + "=" + version + ".\\3'\\4)",strinfo)
@@ -66,11 +69,12 @@ def merge_line(data, setlists):
     else: # 删除图片时间缀
         strinfo = reg_background.sub("background\\1\\2url(\\3)",strinfo)
         strinfo = reg_filter.sub("Microsoft.AlphaImageLoader(\\1src='\\2'\\4)",strinfo)
-
-    if not set_all_in_one: # 不压缩为一行
+    # 不压缩为一行
+    if not set_all_in_one:
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
-        if not set_remove_semicolon: # 还原注释
+        # 还原注释
+        if not set_remove_semicolon:
             reg = re.compile(r'(\[\[!\]\])',re.I)
             _strinfo_ = strinfo.split('[[!]]')
 
@@ -90,30 +94,37 @@ def merge_css(self, edit, setlists):
 
     syntax = view.settings().get('syntax')
     _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
-    fsyntax = _fsyntax_.group(1) # 取得文件类型
-
-    notSel = setlists['notSel'] # 未选中时默认处理方式
+    # 取得文件类型
+    fsyntax = _fsyntax_.group(1)
+    # 未选中时默认处理方式
+    notSel = setlists['notSel']
 
     if fsyntax == 'CSS' or fsyntax == 'HTML':
         for region in sel:
             if region.empty():# 如果没有选中
                 if fsyntax == 'CSS' and notSel == 'all':
-                    region = sublime.Region(0, view.size()) # 全选
-                    text = merge_line(view.substr(region), setlists) # 整理文本
+                    # 全选
+                    region = sublime.Region(0, view.size())
+                    # 整理文本
+                    text = merge_line(view.substr(region), setlists)
                     view.replace(edit, region, text)
-                elif fsyntax == 'HTML' and notSel == 'all': # 处理HTML文件中的STYLE标签
-                    rules = modeCSS.Lib.expand_to_style_in_html(view, region)
-                    for i in range(len(rules)-1, -1,-1): # 倒序替换
-                        text = merge_line(view.substr(rules[i]), setlists) # 整理文本
+                # 处理HTML文件中的STYLE标签
+                elif fsyntax == 'HTML' and notSel == 'all':
+                    rules = modeCSS.Lib.expand_to_style(view, region)
+                    # 倒序替换
+                    for i in range(len(rules)-1, -1,-1):
+                        # 整理文本
+                        text = merge_line(view.substr(rules[i]), setlists)
                         view.replace(edit, rules[i], text)
                 else:
                     region = modeCSS.Lib.expand_to_css_rule(view, region)
-                    text = merge_line(view.substr(region), setlists) # 整理文本
+                    # 整理文本
+                    text = merge_line(view.substr(region), setlists)
                     view.replace(edit, region, text)
             else:
                 region = modeCSS.Lib.get_cur_point(view,region)
-
-                text = merge_line(view.substr(region), setlists) # 整理文本
+                # 整理文本
+                text = merge_line(view.substr(region), setlists)
                 view.replace(edit, region, text)
 
 class MergeCssInLineCommand(sublime_plugin.TextCommand):
