@@ -71,6 +71,7 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                             for pic_path_ in rules:
                                 if project_dir:
                                     _pic_path = modeCSS.Lib.get_abs_path(pic_path_[1],project_dir) # 相对路径转绝对路径
+
                                     _temp_ = []
                                     if os.path.isfile(_pic_path):
                                         _temp_.append(pic_path_[0])
@@ -95,3 +96,5 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                             self.view.replace(edit, _region, text)
                             text = reg_filter.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             self.view.replace(edit, _region, text)
+
+                            fold(_region)

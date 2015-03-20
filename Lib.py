@@ -65,44 +65,16 @@ def point_to_region(point_):
     if len(point_) > 0:
         return sublime.Region(int(point_[0]), int(point_[1]))
 
-def calc(path_a_,path_b_):
-    ''' 路径转换
-        path_a_：要转换的相对路径
-        path_b_：绝对路径
-    '''
-    l = ["..",".",""]
-    _path_a_ = path_a_
-    _path_b_ = path_b_
-    for v in path_a_:
-        if v in l:
-            if v == "..":
-                _path_b_ = _path_b_[:-1]
-                _path_a_ = _path_a_[1:]
-            elif v == ".":
-                _path_a_ = _path_a_[1:]
-            elif v == "":
-                return "\\".join(_path_b_)
-        else:
-            c = v.split(":")
-            if len(c)>1:
-                return "\\".join(_path_a_)
-    return "\\".join(_path_b_) + "\\" + "\\".join(_path_a_)
-
 def get_abs_path(path_a,path_b):
     '''将路径a的相对路径，转换为路径b的绝对路径'''
     if path_b:
         _path_b = os.path.normpath(os.path.normcase(path_b))
+
         if path_a:
             _path_a = os.path.normpath(os.path.normcase(path_a))
         else:
             _path_a = ""
-        if os.path.isabs(_path_a):
-            pass
-        if not os.path.isabs(_path_b):
-            pass
-        _path_a_ = _path_a.split("\\")
-        _path_b_ = _path_b.split("\\")
-        return calc(_path_a_,_path_b_)
+    return os.path.join(_path_b,_path_a)
 
 def region_and_str(region,region_,str_):
     '''转换区域为字符串'''

@@ -51,7 +51,7 @@ class ModeCssCommand(sublime_plugin.TextCommand):
                 content = f.readline()
                 # chardet.detect(content)
             for line in content:
-                print line
+                print(line)
         pass
 
     def run(self, edit):
@@ -59,7 +59,7 @@ class ModeCssCommand(sublime_plugin.TextCommand):
         sel = view.sel()
 
         view.window().show_input_panel("project path:", "", self.on_done, None, None)
-        print files
+        print(files)
         if files:
             for n in files:
                 self.readFile(n)
