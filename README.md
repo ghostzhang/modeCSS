@@ -10,9 +10,9 @@
 
 ### 图片转BASE64编码 ###
 
-* “ctrl+shift+e”：将光标所在位置的图片转换为BASE64编码。CSS为光标规则中的图片；HTML中光标所在的img标签。
-* “ctrl+shift+alt+[”：折叠编辑器中的Base64代码。
-* “ctrl+shift+e”：展开编辑器中的Base64代码。
+* "ctrl+shift+e"：将光标所在位置的图片转换为BASE64编码。CSS为光标规则中的图片；HTML中光标所在的img标签。
+* "ctrl+shift+alt+["：折叠编辑器中的Base64代码。
+* "ctrl+shift+alt+]"：展开编辑器中的Base64代码。
 
 ## TODO LIST ##
 
@@ -37,10 +37,6 @@
 
 * 图片转换功能支持Sublime Text 3
 * 代码优化
-
-已知道问题
-
-* 图片转换功能
 
 #### 2013-01-14 更新
 
