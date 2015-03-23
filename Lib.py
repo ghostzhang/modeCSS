@@ -1,11 +1,27 @@
 # -*- coding: utf-8 -*-
 import sublime,os
 
-def add_region(region,region_len):
-    '''返回region加上region_len后的区间'''
+setlists = {}
+SETTINGS_FILE = "modeCSS.sublime-settings"
+settings = sublime.load_settings(SETTINGS_FILE)
+
+def get_default_set():
+    setlists["notSel"] = settings.get("notSel","nonce")
+    setlists["all_in_one"] = bool(settings.get("all_in_one",False))
+    setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
+    setlists["delete_comments"] = bool(settings.get("delete_comments",True))
+    setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
+    setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
+    setlists["pic_version_str"] = settings.get("pic_version_str","v")
+    setlists["default_porject_path"] = settings.get("default_porject_path","")
+    setlists["base64_fold"] = settings.get("base64_fold",True)
+    return setlists
+
+def cut_region(region,region_begin,region_end):
+    '''返回region减少前后region后的新区间'''
     region = max_point(region)
-    _a = region.a
-    _b = _a + region_len
+    _a = region_begin.b
+    _b = region_end.a
     return sublime.Region(_a,_b)
 
 def max_point(region):

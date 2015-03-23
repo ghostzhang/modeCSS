@@ -25,5 +25,15 @@
       "ctrl+shift+e"
     ],
     "command": "encode_pic_to_base64"
+  },{
+    "keys": [
+      "ctrl+shift+alt+["
+    ],
+    "command": "fold_base64"
+  },{
+    "keys": [
+      "ctrl+shift+alt+]"
+    ],
+    "command": "unfold_base64"
   }
 ]

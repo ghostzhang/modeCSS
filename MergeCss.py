@@ -4,19 +4,6 @@ import locale
 import os, glob, re
 import modeCSS.Lib
 
-setlists = {}
-SETTINGS_FILE = "modeCSS.sublime-settings"
-settings = sublime.load_settings(SETTINGS_FILE)
-
-def get_default_set():
-    setlists["notSel"] = settings.get("notSel","nonce")
-    setlists["all_in_one"] = bool(settings.get("all_in_one",False))
-    setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
-    setlists["delete_comments"] = bool(settings.get("delete_comments",True))
-    setlists["add_pic_time_suffix"] = bool(settings.get("add_pic_time_suffix",False))
-    setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
-    setlists["pic_version_str"] = settings.get("pic_version_str","v")
-
 def merge_line(data, setlists):
     '''压缩样式'''
     set_all_in_one = setlists["all_in_one"]
@@ -131,7 +118,7 @@ class MergeCssInLineCommand(sublime_plugin.TextCommand):
     '''压缩当前样式定义'''
     def run(self, edit):
         view = self.view
-        get_default_set()
+        setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "nonce"
         merge_css(self, edit, setlists)
 
@@ -139,7 +126,7 @@ class MergeCssInDocumentCommand(sublime_plugin.TextCommand):
     '''压缩整个文档'''
     def run(self, edit):
         view = self.view
-        get_default_set()
+        setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "all"
         merge_css(self, edit, setlists)
 
@@ -147,7 +134,7 @@ class MergeCssInDocumentOneLineCommand(sublime_plugin.TextCommand):
     '''压缩整个文档为一行'''
     def run(self, edit):
         view = self.view
-        get_default_set()
+        setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "all"
         setlists["all_in_one"] = True
         merge_css(self, edit, setlists)

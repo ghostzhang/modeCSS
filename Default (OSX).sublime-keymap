@@ -1,12 +1,12 @@
 [
   {
     "keys": [
-      "ctrl+super+z"
+      "ctrl+shift+x"
     ],
     "command": "mode_css"
   },{
     "keys": [
-      "ctrl+super+m"
+      "ctrl+shift+m"
     ],
     "command": "merge_css_in_line"
   },{
@@ -16,8 +16,24 @@
     "command": "merge_css_in_document"
   },{
     "keys": [
+      "ctrl+shift+super+m",
+      "ctrl+shift+super+l"
+    ],
+    "command": "merge_css_in_document_one_line"
+  },{
+    "keys": [
       "ctrl+shift+e"
     ],
     "command": "encode_pic_to_base64"
+  },{
+    "keys": [
+      "ctrl+shift+super+["
+    ],
+    "command": "fold_base64"
+  },{
+    "keys": [
+      "ctrl+shift+super+]"
+    ],
+    "command": "unfold_base64"
   }
 ]

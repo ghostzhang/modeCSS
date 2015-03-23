@@ -11,5 +11,6 @@
 	"pic_time_suffix_extension":true, // 图片时间缀后缀 true: backgroud.png?v=20130131_145829.png;false: backgroud.png?v=20130131_145829
 	"pic_version_str":"v", // 版本标识
 	// 图片编码转换
-	"default_porject_path":"" // 转换路径时的默认项目路径，为空时将使用当前文件的路径为转换参考
+	"default_porject_path":"", // 转换路径时的默认项目路径，为空时将使用当前文件的路径为转换参考
+	"base64_fold":true // 折叠转换后的代码
 }

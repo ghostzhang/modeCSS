@@ -24,6 +24,16 @@
         "caption": "Img To Base64",
         "command": "encode_pic_to_base64",
         "id": "encode_pic_to_base64"
+      },
+      {
+        "caption": "Fold Base64",
+        "command": "fold_base64",
+        "id": "fold_base64"
+      },
+      {
+        "caption": "Unfold Base64",
+        "command": "unfold_base64",
+        "id": "unfold_base64"
       }
     ]
   }

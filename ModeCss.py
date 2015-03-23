@@ -2,9 +2,7 @@
 import sublime, sublime_plugin
 import locale
 import os, glob, re
-
-SETTINGS_FILE = "modeCSS.sublime-settings"
-settings = sublime.load_settings(SETTINGS_FILE)
+import modeCSS.Lib
 
 class ModeCssCommand(sublime_plugin.TextCommand):
     '''项目模块管理'''

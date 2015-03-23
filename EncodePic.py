@@ -5,11 +5,6 @@ import urllib.request, urllib.parse, urllib.error
 import base64
 import modeCSS.Lib
 
-SETTINGS_FILE = "modeCSS.sublime-settings"
-settings = sublime.load_settings(SETTINGS_FILE)
-setlists = {}
-setlists["default_porject_path"] = settings.get("default_porject_path","")
-
 def expand_pic_in_html(region,data):
     '''取得图片地址'''
     pic_path = []
@@ -40,11 +35,31 @@ def encode_pic(path):
             cont = base64.b64encode(f.read())
         return "data:image/"+ extension +";base64," + cont.decode('ascii')
 
+def fold_base64(view):
+    '''折叠base64编码'''
+    base64 = 'data:image/.*;base64,(.*?)[\'\"\)]'
+    base64_begin = 'data:image/.*;base64,'
+    base64_end = '[\'\"\)]'
+    rules = view.find_all(base64)
+    for rule in rules:
+        begin = view.find(base64_begin,rule.a,re.I)
+        end = view.find(base64_end,rule.a,re.I)
+        fold = modeCSS.Lib.cut_region(rule,begin,end)
+        view.fold(fold)
+
+def unfold_base64(view):
+    '''展开base64编码'''
+    base64 = 'data:image/.*;base64,(.*?)[\'\"\)]'
+    rules = view.find_all(base64)
+    for rule in rules:
+        view.unfold(rule)
+
 class EncodePicToBase64Command(sublime_plugin.TextCommand):
     '''转换图片编码为base64'''
     def run(self, edit):
         view = self.view
         sel = view.sel()
+        setlists = modeCSS.Lib.get_default_set()
 
         syntax = view.settings().get('syntax')
         _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
@@ -76,6 +91,7 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                                 else:
                                     _temp_.append("")
                                     _temp_.append(_pic_path)
+
                                 _pic_path_.append(_temp_)
 
                 reg_rule = re.compile(r'(<img[^>]+src\s*=\s*[\'\"])[^\'\"]+([\'\"][^>]*>)',re.I)
@@ -95,4 +111,17 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                             text = reg_filter.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             self.view.replace(edit, _region, text)
 
-                            # self.view.fold(modeCSS.Lib.add_region(_region,len(_pic_path_[i][1])))
+                            if setlists["base64_fold"]:
+                                fold_base64(view)
+
+class FoldBase64Command(sublime_plugin.TextCommand):
+    '''折叠base64编码'''
+    def run(self, edit):
+        view = self.view
+        fold_base64(view)
+
+class UnfoldBase64Command(sublime_plugin.TextCommand):
+    '''展开base64编码'''
+    def run(self, edit):
+        view = self.view
+        unfold_base64(view)
