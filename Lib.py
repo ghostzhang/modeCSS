@@ -2,10 +2,12 @@
 import sublime,os
 
 setlists = {}
-SETTINGS_FILE = "modeCSS.sublime-settings"
-settings = sublime.load_settings(SETTINGS_FILE)
 
 def get_default_set():
+    global setlists
+    SETTINGS_FILE = "modeCSS.sublime-settings"
+    settings = sublime.load_settings(SETTINGS_FILE)
+
     setlists["notSel"] = settings.get("notSel","nonce")
     setlists["all_in_one"] = bool(settings.get("all_in_one",False))
     setlists["remove_semicolon"] = bool(settings.get("remove_semicolon",False))
@@ -14,7 +16,7 @@ def get_default_set():
     setlists["pic_time_suffix_extension"] = bool(settings.get("pic_time_suffix_extension",False))
     setlists["pic_version_str"] = settings.get("pic_version_str","v")
     setlists["default_porject_path"] = settings.get("default_porject_path","")
-    setlists["base64_fold"] = settings.get("base64_fold",True)
+    setlists["base64_fold"] = bool(settings.get("base64_fold",True))
     return setlists
 
 def cut_region(region,region_begin,region_end):

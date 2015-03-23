@@ -73,10 +73,6 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         sel = view.sel()
-        if ST2:
-            setlists = Lib.get_default_set()
-        else:
-            setlists = modeCSS.Lib.get_default_set()
 
         syntax = view.settings().get('syntax')
         _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
@@ -84,8 +80,10 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
         fsyntax = _fsyntax_.group(1)
 
         if ST2:
+            setlists = Lib.get_default_set()
             project_dir = setlists["default_porject_path"] or Lib.get_dis(view)
         else:
+            setlists = modeCSS.Lib.get_default_set()
             project_dir = setlists["default_porject_path"] or modeCSS.Lib.get_dis(view)
 
         for region in sel:
@@ -98,7 +96,6 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
             if _region:
                 # 取得图片路径列表
                 rules_ = expand_pic_in_html(_region,view.substr(_region)) 
-                # print(rules_)
 
                 if len(rules_) > 0:
                     for rules in rules_:
@@ -133,7 +130,6 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                                 _region = modeCSS.Lib.point_to_region(_pic_path_[i][0])
 
                             text = reg_rule.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
-                            # print(_pic_path_[i][1])
                             self.view.replace(edit, _region, text)
                             text = reg_background.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             self.view.replace(edit, _region, text)
