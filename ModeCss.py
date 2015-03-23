@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 import sublime, sublime_plugin
 import locale
-import os, glob, re
-import modeCSS.Lib
+import os, glob, re,sys
+
+ST2 = sys.version_info < (3, 0)
+
+if ST2:
+    import Lib
+else:
+    import modeCSS.Lib
 
 class ModeCssCommand(sublime_plugin.TextCommand):
     '''项目模块管理'''

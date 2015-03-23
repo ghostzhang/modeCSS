@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import sublime, sublime_plugin
 import locale
-import os, glob, re
-import modeCSS.Lib
+import os, glob, re,sys
+ST2 = sys.version_info < (3, 0)
+
+if ST2:
+    import Lib
+else:
+    import modeCSS.Lib
 
 def merge_line(data, setlists):
     '''压缩样式'''
@@ -14,7 +19,10 @@ def merge_line(data, setlists):
     set_pic_version_str = setlists["pic_version_str"]
 
     _comments_ = []
-    version = modeCSS.Lib.build_time_suffix()
+    if ST2:
+        version = Lib.build_time_suffix()
+    else:
+        version = modeCSS.Lib.build_time_suffix()
     if set_delete_comments:
         # 删除注释
         strinfo = re.compile(r'\/\*(?:.|\s)*?\*\/',re.I).sub('',data)
@@ -97,19 +105,28 @@ def merge_css(self, edit, setlists):
                     view.replace(edit, region, text)
                 # 处理HTML文件中的STYLE标签
                 elif fsyntax == 'HTML' and notSel == 'all':
-                    rules = modeCSS.Lib.expand_to_style(view, region)
+                    if ST2:
+                        rules = Lib.expand_to_style(view, region)
+                    else:
+                        rules = modeCSS.Lib.expand_to_style(view, region)
                     # 倒序替换
                     for i in range(len(rules)-1, -1,-1):
                         # 整理文本
                         text = merge_line(view.substr(rules[i]), setlists)
                         view.replace(edit, rules[i], text)
                 else:
-                    region = modeCSS.Lib.expand_to_css_rule(view, region)
+                    if ST2:
+                        region = Lib.expand_to_css_rule(view, region)
+                    else:
+                        region = modeCSS.Lib.expand_to_css_rule(view, region)
                     # 整理文本
                     text = merge_line(view.substr(region), setlists)
                     view.replace(edit, region, text)
             else:
-                region = modeCSS.Lib.get_cur_point(view,region)
+                if ST2:
+                    region = Lib.get_cur_point(view,region)
+                else:
+                    region = modeCSS.Lib.get_cur_point(view,region)
                 # 整理文本
                 text = merge_line(view.substr(region), setlists)
                 view.replace(edit, region, text)
@@ -118,7 +135,10 @@ class MergeCssInLineCommand(sublime_plugin.TextCommand):
     '''压缩当前样式定义'''
     def run(self, edit):
         view = self.view
-        setlists = modeCSS.Lib.get_default_set()
+        if ST2:
+            setlists = Lib.get_default_set()
+        else:
+            setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "nonce"
         merge_css(self, edit, setlists)
 
@@ -126,7 +146,10 @@ class MergeCssInDocumentCommand(sublime_plugin.TextCommand):
     '''压缩整个文档'''
     def run(self, edit):
         view = self.view
-        setlists = modeCSS.Lib.get_default_set()
+        if ST2:
+            setlists = Lib.get_default_set()
+        else:
+            setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "all"
         merge_css(self, edit, setlists)
 
@@ -134,7 +157,10 @@ class MergeCssInDocumentOneLineCommand(sublime_plugin.TextCommand):
     '''压缩整个文档为一行'''
     def run(self, edit):
         view = self.view
-        setlists = modeCSS.Lib.get_default_set()
+        if ST2:
+            setlists = Lib.get_default_set()
+        else:
+            setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "all"
         setlists["all_in_one"] = True
         merge_css(self, edit, setlists)

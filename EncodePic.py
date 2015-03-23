@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 import sublime, sublime_plugin
-import os,re
-import urllib.request, urllib.parse, urllib.error
+import os,re,sys
 import base64
-import modeCSS.Lib
+ST2 = sys.version_info < (3, 0)
+
+if ST2:
+    import urllib
+    import Lib
+else:
+    import urllib.request, urllib.parse, urllib.error
+    import modeCSS.Lib
 
 def expand_pic_in_html(region,data):
     '''取得图片地址'''
@@ -13,13 +19,18 @@ def expand_pic_in_html(region,data):
     reg_img = re.compile(r'<img[^>]+src\s*=\s*[\'\"]([^\'\"]+)[\'\"][^>]*>',re.I)
     _b1_ = reg_background.finditer(data)
     _b2_ = reg_background.findall(data)
-    _b_ = modeCSS.Lib.region_and_str(region,_b1_,_b2_)
     _f1_ = reg_filter.finditer(data)
     _f2_ = reg_filter.findall(data)
-    _f_ = modeCSS.Lib.region_and_str(region,_f1_,_f2_)
     _i1_ = reg_img.finditer(data)
     _i2_ = reg_img.findall(data)
-    _i_ = modeCSS.Lib.region_and_str(region,_i1_,_i2_)
+    if ST2:
+        _b_ = Lib.region_and_str(region,_b1_,_b2_)
+        _f_ = Lib.region_and_str(region,_f1_,_f2_)
+        _i_ = Lib.region_and_str(region,_i1_,_i2_)
+    else:
+        _b_ = modeCSS.Lib.region_and_str(region,_b1_,_b2_)
+        _f_ = modeCSS.Lib.region_and_str(region,_f1_,_f2_)
+        _i_ = modeCSS.Lib.region_and_str(region,_i1_,_i2_)
     if _b_:
         pic_path.append(_b_)
     if _f_:
@@ -44,7 +55,10 @@ def fold_base64(view):
     for rule in rules:
         begin = view.find(base64_begin,rule.a,re.I)
         end = view.find(base64_end,rule.a,re.I)
-        fold = modeCSS.Lib.cut_region(rule,begin,end)
+        if ST2:
+            fold = Lib.cut_region(rule,begin,end)
+        else:
+            fold = modeCSS.Lib.cut_region(rule,begin,end)
         view.fold(fold)
 
 def unfold_base64(view):
@@ -59,18 +73,27 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         sel = view.sel()
-        setlists = modeCSS.Lib.get_default_set()
+        if ST2:
+            setlists = Lib.get_default_set()
+        else:
+            setlists = modeCSS.Lib.get_default_set()
 
         syntax = view.settings().get('syntax')
         _fsyntax_ = re.search(r'\/([\w ]+)\.',syntax)
         # 取得文件类型
         fsyntax = _fsyntax_.group(1)
 
-        project_dir = setlists["default_porject_path"] or modeCSS.Lib.get_dis(view)
+        if ST2:
+            project_dir = setlists["default_porject_path"] or Lib.get_dis(view)
+        else:
+            project_dir = setlists["default_porject_path"] or modeCSS.Lib.get_dis(view)
 
         for region in sel:
             _pic_path_ = []
-            _region = modeCSS.Lib.get_cur_point(view, region)
+            if ST2:
+                _region = Lib.get_cur_point(view, region)
+            else:
+                _region = modeCSS.Lib.get_cur_point(view, region)
 
             if _region:
                 # 取得图片路径列表
@@ -82,7 +105,10 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                         for pic_path_ in rules:
                             if project_dir:
                                 # 相对路径转绝对路径
-                                _pic_path = modeCSS.Lib.get_abs_path(pic_path_[1],project_dir) 
+                                if ST2:
+                                    _pic_path = Lib.get_abs_path(pic_path_[1],project_dir)
+                                else:
+                                    _pic_path = modeCSS.Lib.get_abs_path(pic_path_[1],project_dir)
 
                                 _temp_ = []
                                 if os.path.isfile(_pic_path):
@@ -101,7 +127,10 @@ class EncodePicToBase64Command(sublime_plugin.TextCommand):
                 if len(_pic_path_) > 0:
                     for i in range(len(_pic_path_)-1, -1,-1): # 倒序替换
                         if _pic_path_[i][0]:
-                            _region = modeCSS.Lib.point_to_region(_pic_path_[i][0])
+                            if ST2:
+                                _region = Lib.point_to_region(_pic_path_[i][0])
+                            else:
+                                _region = modeCSS.Lib.point_to_region(_pic_path_[i][0])
 
                             text = reg_rule.sub("\\1" + _pic_path_[i][1] + "\\2",view.substr(_region))
                             # print(_pic_path_[i][1])
