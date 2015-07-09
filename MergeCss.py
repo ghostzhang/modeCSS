@@ -44,10 +44,11 @@ def merge_line(data, setlists):
     strinfo = re.compile(r'"{2,}',re.I).sub('"',strinfo) # 删除多余引号
     strinfo = re.compile(r'\'{2,}',re.I).sub('\'',strinfo) # 删除多余引号
     strinfo = re.compile(r'content:[\"|\'][; ]',re.I).sub('content:\"\";',strinfo) # 修正content引号缺失
-    strinfo = re.compile(r';{2,}',re.I).sub(';',strinfo) # 删除多余空格
-    strinfo = re.compile(r' {2,}',re.I).sub(' ',strinfo) # 删除多余空格
-    strinfo = re.compile(r' *} *',re.I).sub('}',strinfo) # 删除多余空格
+    strinfo = re.compile(r';{2,}',re.I).sub(';',strinfo) # 删除多余分号
+    strinfo = re.compile(r' {2,}',re.I).sub(' ',strinfo) # 删除多余分号
+    strinfo = re.compile(r' *} *',re.I).sub('}',strinfo) # 删除多余大括号
     # 删除最后一个分号
+
     if set_remove_semicolon:
         strinfo = re.compile(r';}',re.I).sub('}',strinfo)
 
@@ -68,17 +69,18 @@ def merge_line(data, setlists):
     if not set_all_in_one:
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
-        # 还原注释
-        if not set_remove_semicolon:
-            reg = re.compile(r'(\[\[!\]\])',re.I)
-            _strinfo_ = strinfo.split('[[!]]')
+        strinfo = re.compile(r'\n*',re.I).sub('',strinfo) # 删除多余换行
+    # 还原注释
+    if not set_remove_semicolon:
+        # reg = re.compile(r'(\[\[!\]\])',re.I)
+        _strinfo_ = strinfo.split('[[!]]')
 
-            if len(_comments_) >1: 
-                string = ""
-                for i in range(0, len(_comments_)):
-                    string += _strinfo_[i] +"\n"+ _comments_[i] +"\n"
-                strinfo = string
-                
+        if len(_comments_) >1: 
+            string = ""
+            for i in range(0, len(_comments_)):
+                string += _strinfo_[i] + _comments_[i]
+            strinfo = string
+        strinfo = re.compile(r'(\*\/)(.*?\{)',re.I).sub('\\1\n\\2',strinfo)
     return strinfo
 
 
@@ -123,6 +125,9 @@ def merge_css(self, edit, setlists):
                     text = merge_line(view.substr(region), setlists)
                     view.replace(edit, region, text)
             else:
+                if notSel == 'all':
+                    # 全选
+                    region = sublime.Region(0, view.size())
                 if ST2:
                     region = Lib.get_cur_point(view,region)
                 else:
