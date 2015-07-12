@@ -13,7 +13,10 @@ def merge_line(data, setlists):
     '''压缩样式'''
     set_all_in_one = setlists["all_in_one"]
     set_remove_semicolon = setlists["remove_semicolon"]
-    set_delete_comments = setlists["delete_comments"]
+    if set_all_in_one:
+        set_delete_comments = True
+    else:
+        set_delete_comments = setlists["delete_comments"]
     set_add_pic_time_suffix = setlists["add_pic_time_suffix"]
     set_pic_time_suffix_extension = setlists["pic_time_suffix_extension"]
     set_pic_version_str = setlists["pic_version_str"]
@@ -69,6 +72,7 @@ def merge_line(data, setlists):
     if not set_all_in_one:
         strinfo = re.compile(r'}',re.I).sub('}\n',strinfo)
         strinfo = re.compile(r'}[\n\t]*}',re.I).sub('}}',strinfo)
+    else:
         strinfo = re.compile(r'\n*',re.I).sub('',strinfo) # 删除多余换行
     # 还原注释
     if not set_remove_semicolon:
@@ -80,7 +84,9 @@ def merge_line(data, setlists):
             for i in range(0, len(_comments_)):
                 string += _strinfo_[i] + _comments_[i]
             strinfo = string
-        strinfo = re.compile(r'(\*\/)(.*?\{)',re.I).sub('\\1\n\\2',strinfo)
+            if not set_all_in_one:
+                strinfo = re.compile(r'(\*\/)(.*?\{)',re.I).sub('\\1\n\\2',strinfo)
+
     return strinfo
 
 
@@ -168,4 +174,5 @@ class MergeCssInDocumentOneLineCommand(sublime_plugin.TextCommand):
             setlists = modeCSS.Lib.get_default_set()
         setlists["notSel"] = "all"
         setlists["all_in_one"] = True
+        setlists["delete_comments"] = True
         merge_css(self, edit, setlists)
